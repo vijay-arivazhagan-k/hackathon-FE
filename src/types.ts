@@ -4,10 +4,8 @@ export interface Category {
   CategoryDescription?: string;
   MaximumAmount?: number;
   Status: boolean;
-  RequestCount?: number;
-  Document?: string; // base64 or url
-  HasDocument?: boolean;
-  DocumentUrl?: string;
+  // RequestCount removed from UI
+  ApprovalCriteria?: string;
   CreatedOn?: string;
   CreatedBy?: string;
   UpdatedOn?: string;
@@ -21,10 +19,7 @@ export interface CategoryHistory {
   CategoryDescription?: string;
   MaximumAmount?: number;
   Status?: boolean;
-  RequestCount?: number;
-  Document?: string;
-  HasDocument?: boolean;
-  DocumentUrl?: string;
+  ApprovalCriteria?: string;
   Comments: string;
   CreatedOn: string;
   CreatedBy?: string;
@@ -64,6 +59,5 @@ export interface CategoryCreate {
   CategoryDescription?: string;
   MaximumAmount?: number;
   Status?: boolean;
-  RequestCount?: number;
-  Document?: File | null;
+  ApprovalCriteria: string; // required
 }

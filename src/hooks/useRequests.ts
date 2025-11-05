@@ -137,10 +137,10 @@ export const useRequest = (id?: number): UseRequestResult => {
   }, []);
 
   const refreshRequest = useCallback(async () => {
-    if (request?.ID) {
-      await loadRequest(request.ID);
+    if (request?.id) {
+      await loadRequest(request.id);
     }
-  }, [request?.ID, loadRequest]);
+  }, [request?.id, loadRequest]);
 
   useEffect(() => {
     if (id) {

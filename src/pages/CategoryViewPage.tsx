@@ -42,53 +42,7 @@ const CategoryViewPage: React.FC = () => {
     }
   };
 
-  const renderDocument = (doc: any, historyId?: number) => {
-    if (!doc) return null;
-
-    // If doc is a URL string
-    if (typeof doc === 'string' && (doc.startsWith('http') || doc.startsWith('data:')) ) {
-      const isPdf = doc.toLowerCase().endsWith('.pdf') || doc.startsWith('data:application/pdf');
-      return (
-        <Box sx={{ mt: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <ArticleIcon />
-            <Typography variant="body2">Uploaded document</Typography>
-            <Box sx={{ flex: 1 }} />
-            <IconButton onClick={() => openDoc(doc, 'Document Preview')} aria-label="Open document">
-              <OpenInNewIcon />
-            </IconButton>
-            <IconButton href={doc} download aria-label="Download document">
-              <DownloadIcon />
-            </IconButton>
-          </Box>
-        </Box>
-      );
-    }
-
-    // If doc is not a URL, attempt to fetch from backend endpoints
-  const catId = category?.ID;
-  if (!catId) return null;
-  const categoryDocUrl = `${BACKEND_BASE}/api/v1/categories/${catId}/document`;
-  const historyDocUrl = historyId ? `${BACKEND_BASE}/api/v1/categories/${catId}/history/${historyId}/document` : null;
-
-    const openUrl = historyDocUrl || categoryDocUrl;
-
-    return (
-      <Box sx={{ mt: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <ArticleIcon />
-          <Typography variant="body2">Uploaded document</Typography>
-          <Box sx={{ flex: 1 }} />
-          <IconButton onClick={() => openDoc(openUrl || '', 'Document Preview')} aria-label="Open document">
-            <OpenInNewIcon />
-          </IconButton>
-          <IconButton component="a" href={openUrl || '#'} target="_blank" rel="noopener noreferrer" download aria-label="Download document">
-            <DownloadIcon />
-          </IconButton>
-        </Box>
-      </Box>
-    );
-  };
+  // Document view logic removed
 
   // dialog state for inline preview
   const [docOpen, setDocOpen] = useState(false);
@@ -110,10 +64,39 @@ const CategoryViewPage: React.FC = () => {
   useEffect(() => {
     async function load() {
       if (!id) return;
-      const cat = await fetchCategory(Number(id));
-      setCategory(cat);
-      const hist = await fetchCategoryHistory(Number(id));
-      setHistory(hist);
+  const cat: any = await fetchCategory(Number(id));
+      // map backend fields to frontend Category shape
+      const mapped = {
+        ID: cat.id,
+        CategoryName: cat.categoryname,
+        CategoryDescription: cat.categorydescription,
+        MaximumAmount: cat.maximumamount,
+        Status: Boolean(cat.status),
+        RequestCount: cat.requestcount,
+        ApprovalCriteria: cat.approval_criteria,
+        CreatedOn: cat.createdon,
+        CreatedBy: cat.createdby,
+        UpdatedOn: cat.updatedon,
+        UpdatedBy: cat.updatedby,
+      } as Category;
+      setCategory(mapped);
+
+  const hist: any[] = await fetchCategoryHistory(Number(id));
+  const mappedHist = (hist || []).map((h: any) => ({
+        ID: h.id,
+        CATEGORY_ID: h.category_id,
+        CategoryName: h.categoryname,
+        CategoryDescription: h.categorydescription,
+        MaximumAmount: h.maximumamount,
+        Status: Boolean(h.status),
+        RequestCount: h.requestcount,
+        ApprovalCriteria: h.approval_criteria,
+        Comments: h.comments,
+        CreatedOn: h.createdon,
+        CreatedBy: h.createdby,
+        // document fields removed or handled separately
+      }));
+      setHistory(mappedHist);
     }
     load();
   }, [id]);
@@ -154,24 +137,21 @@ const CategoryViewPage: React.FC = () => {
                             <Grid item>
                               <Box sx={{ display: 'flex', gap: 1 }}>
                                 <Button variant="outlined" onClick={() => navigate(`/categories/${category.ID}/edit`)}>Edit</Button>
-                                <Button
-                                  variant="contained"
-                                  onClick={() => openDoc(`${BACKEND_BASE}${category.DocumentUrl}`, 'Category Document')}
-                                  disabled={!category.HasDocument}
-                                >
-                                  View Document
-                                </Button>
+                                {/* View Document button removed */}
                               </Box>
                             </Grid>
               </Grid>
 
-              <Box sx={{ mt: 2 }}>
+                <Box sx={{ mt: 2 }}>
                 <Typography variant="body1">{category.CategoryDescription ?? 'No description provided.'}</Typography>
-                {category.HasDocument ? (
-                  renderDocument(category.DocumentUrl)
-                ) : (
-                  <Typography variant="body2" sx={{ mt: 2 }}>No document attached.</Typography>
-                )}
+                <Box sx={{ mt: 2, p: 2, bgcolor: '#f5f5f5', borderRadius: 1, minHeight: 80 }}>
+                  <Typography sx={{ whiteSpace: 'pre-line' }}>
+                    <strong>Approval Criteria:</strong>
+                    {' '}
+                    {category.ApprovalCriteria || 'N/A'}
+                  </Typography>
+                </Box>
+                {/* Document view logic removed */}
               </Box>
 
               <Box sx={{ mt: 2, display: 'flex', gap: 4 }}>
@@ -203,28 +183,27 @@ const CategoryViewPage: React.FC = () => {
             <Typography>No history available.</Typography>
           ) : (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              {history.map((h, idx) => (
-                <Paper key={idx} elevation={2} sx={{ p: 2, display: 'flex', gap: 2, alignItems: 'center' }}>
+              {history.map((h) => (
+                <Paper key={h.ID} elevation={2} sx={{ p: 2, display: 'flex', gap: 2, alignItems: 'center' }}>
                   <Avatar sx={{ bgcolor: '#6b46c1' }}>{(h.CreatedBy || 'U').slice(0,1).toUpperCase()}</Avatar>
                   <Box sx={{ flex: 1 }}>
                     <Typography sx={{ fontWeight: 600 }}>{h.Comments}</Typography>
                     <Typography variant="body2">{h.CategoryName} • {h.CategoryDescription}</Typography>
-                    <Box sx={{ mt: 1, display: 'flex', gap: 2 }}>
+                    <Box sx={{ mt: 1, display: 'flex', gap: 2, flexDirection: 'column' }}>
                       <Typography variant="caption">Amount: {h.MaximumAmount ?? '-'}</Typography>
                       <Typography variant="caption">Requests: {h.RequestCount ?? '-'}</Typography>
                       <Typography variant="caption">Status: {h.Status ? 'Enabled' : 'Disabled'}</Typography>
+                      <Box sx={{ mt: 1, p: 1, bgcolor: '#fafafa', borderRadius: 1, minHeight: 56 }}>
+                        <Typography variant="body2" sx={{ whiteSpace: 'pre-line', fontSize: '0.9rem' }}>
+                          <strong>Approval Criteria:</strong>
+                          {' '}
+                          {h.ApprovalCriteria || 'N/A'}
+                        </Typography>
+                      </Box>
                     </Box>
                   </Box>
                   <Box sx={{ textAlign: 'right', display: 'flex', flexDirection: 'column', gap: 1, alignItems: 'flex-end' }}>
-                    <Box>
-                      <Button
-                        size="small"
-                        onClick={() => openDoc(`${BACKEND_BASE}${h.DocumentUrl}`, `History ${h.ID}`)}
-                        disabled={!h.HasDocument}
-                      >
-                        View
-                      </Button>
-                    </Box>
+                    {/* Document view removed - Approval criteria shown in details */}
                     <Box>
                       <Typography variant="caption">By: {h.CreatedBy ?? '-'}</Typography>
                       <Typography variant="caption">{formatDate(h.CreatedOn)}</Typography>

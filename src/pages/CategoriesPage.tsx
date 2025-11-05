@@ -14,7 +14,21 @@ const CategoriesPage: React.FC = () => {
 
   async function load(page: number = 1) {
     const res = await fetchCategories(page, 100);
-    setData(res.items);
+    // Map backend response fields (lowercase) to frontend Category shape (PascalCase)
+    const items = (res.items || []).map((it: any) => ({
+      ID: it.id,
+      CategoryName: it.categoryname,
+      CategoryDescription: it.categorydescription,
+      MaximumAmount: it.maximumamount,
+      Status: Boolean(it.status),
+      RequestCount: it.requestcount,
+      ApprovalCriteria: it.approval_criteria,
+      CreatedOn: it.createdon,
+      CreatedBy: it.createdby,
+      UpdatedOn: it.updatedon,
+      UpdatedBy: it.updatedby,
+    }));
+    setData(items);
   }
 
   return (
@@ -91,12 +105,17 @@ const CategoriesPage: React.FC = () => {
                     {cat.CategoryName}
                   </Typography>
                   <Typography>Description: {cat.CategoryDescription}</Typography>
+                  <Box sx={{ mt: 1, p: 1, bgcolor: '#f5f5f5', borderRadius: 1, minHeight: 56 }}>
+                    <Typography sx={{ whiteSpace: 'pre-line', fontSize: '0.95rem' }}>
+                      <strong>Approval Criteria:</strong>
+                      {' '}
+                      {cat.ApprovalCriteria || 'N/A'}
+                    </Typography>
+                  </Box>
                   <Typography>Max Amount: {cat.MaximumAmount}</Typography>
                   <Typography>Request Count: {cat.RequestCount}</Typography>
                   <Typography>Status: {cat.Status ? 'Enabled' : 'Disabled'}</Typography>
-                  {cat.Document && (
-                    <Typography>Document: <a href={cat.Document} target="_blank" rel="noopener noreferrer">View</a></Typography>
-                  )}
+                  {/* Document view UI removed */}
                 </CardContent>
               </Card>
             </Grid>

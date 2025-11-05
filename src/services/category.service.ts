@@ -33,7 +33,7 @@ export class CategoryService {
   }
 
   /**
-   * Create new category with optional file upload
+   * Create new category
    */
   async createCategory(data: {
     CategoryName: string;
@@ -41,7 +41,7 @@ export class CategoryService {
     MaximumAmount?: number;
     Status?: boolean;
     RequestCount?: number;
-    Document?: File | null;
+    ApprovalCriteria?: string;
   }): Promise<Category> {
     const formData = new FormData();
     formData.append('CategoryName', data.CategoryName);
@@ -58,19 +58,19 @@ export class CategoryService {
     if (data.RequestCount !== undefined) {
       formData.append('RequestCount', data.RequestCount.toString());
     }
-    if (data.Document) {
-      formData.append('Document', data.Document);
+    if (data.ApprovalCriteria) {
+      formData.append('ApprovalCriteria', data.ApprovalCriteria);
     }
 
     return apiService.uploadFile<Category>(this.endpoint + '/', formData);
   }
 
   /**
-   * Update category with optional file upload
+   * Update category
    */
   async updateCategory(
     id: number,
-    data: Partial<Category> & { Document?: File | null; Comments?: string }
+    data: Partial<Category> & { Comments?: string }
   ): Promise<Category> {
     const formData = new FormData();
 
@@ -89,11 +89,11 @@ export class CategoryService {
     if (data.RequestCount !== undefined) {
       formData.append('RequestCount', data.RequestCount.toString());
     }
+    if (data.ApprovalCriteria !== undefined) {
+      formData.append('ApprovalCriteria', data.ApprovalCriteria);
+    }
     if (data.Comments) {
       formData.append('Comments', data.Comments);
-    }
-    if (data.Document) {
-      formData.append('Document', data.Document);
     }
 
     return apiService.uploadFile<Category>(`${this.endpoint}/${id}`, formData);
