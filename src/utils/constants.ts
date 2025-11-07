@@ -7,7 +7,7 @@
  * API Configuration
  */
 export const API_CONFIG = {
-  BASE_URL: 'http://127.0.0.1:8000/api', // Try 8000 first, then fallback to 8001
+  BASE_URL: 'http://127.0.0.1:8001/api', // Server is running on port 8001
   TIMEOUT: 30000,
   VERSION: 'v1',
 } as const;

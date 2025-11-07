@@ -17,11 +17,22 @@ export class RequestService {
     pageSize: number = 20,
     filters?: {
       status?: string;
+      start?: string;
+      end?: string;
+      category_id?: string;
     }
   ): Promise<Paginated<RequestItem>> {
     const params: any = { page, page_size: pageSize };
     if (filters?.status && filters.status !== 'all') params.status = filters.status;
-    return apiService.get<Paginated<RequestItem>>(this.endpoint + '/', { params });
+    if (filters?.start) params.start = filters.start;
+    if (filters?.end) params.end = filters.end;
+    if (filters?.category_id && filters.category_id !== 'all') params.category_id = filters.category_id;
+    
+    console.log('🔍 Fetching requests with params:', params);
+    const result = await apiService.get<Paginated<RequestItem>>(this.endpoint + '/', { params });
+    console.log('✅ Received requests:', result);
+    
+    return result;
   }
 
   /**
@@ -59,9 +70,15 @@ export class RequestService {
   /**
    * Fetch insights/statistics
    */
-  async getInsights(duration?: string): Promise<Insights> {
+  async getInsights(filters?: {
+    start?: string;
+    end?: string;
+    duration?: string;
+  }): Promise<Insights> {
     const params: any = {};
-    if (duration) params.duration = duration;
+    if (filters?.start) params.start = filters.start;
+    if (filters?.end) params.end = filters.end;
+    if (filters?.duration) params.duration = filters.duration;
 
     return apiService.get<Insights>(`${this.endpoint}/insights/summary`, { params });
   }

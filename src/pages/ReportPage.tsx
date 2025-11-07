@@ -30,9 +30,9 @@ const ReportPage: React.FC = () => {
 
   async function load(page: number = 1) {
     const params: any = { page, page_size: 50 };
-    if (start) params.start = start.toISOString();
-    if (end) params.end = end.toISOString();
-    if (status) params.status = status;
+    if (start) params.start = start.format('YYYY-MM-DD');
+    if (end) params.end = end.format('YYYY-MM-DD');
+    if (status && status !== 'all') params.status = status;
     if (categoryId) params.category_id = categoryId;
     const res = await fetchReports(params);
     setData(res.items);
@@ -177,9 +177,9 @@ const ReportPage: React.FC = () => {
           <Button
             variant="contained"
             onClick={() => exportReports({
-              start: start?.toISOString(),
-              end: end?.toISOString(),
-              status,
+              start: start?.format('YYYY-MM-DD'),
+              end: end?.format('YYYY-MM-DD'),
+              status: status !== 'all' ? status : undefined,
               category_id: categoryId
             })}
             disabled={data.length === 0}

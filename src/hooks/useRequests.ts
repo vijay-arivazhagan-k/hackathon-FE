@@ -24,7 +24,7 @@ interface UseRequestsResult {
       status?: string;
       start?: string;
       end?: string;
-      category_id?: number;
+      category_id?: string;
     }
   ) => Promise<void>;
   refreshRequests: () => Promise<void>;
@@ -34,8 +34,10 @@ export const useRequests = (
   initialPage: number = 1,
   initialPageSize: number = 20,
   initialFilters?: {
-    duration?: string;
     status?: string;
+    start?: string;
+    end?: string;
+    category_id?: string;
   }
 ): UseRequestsResult => {
   const [requests, setRequests] = useState<RequestItem[]>([]);
@@ -54,6 +56,9 @@ export const useRequests = (
       pageSize?: number,
       newFilters?: {
         status?: string;
+        start?: string;
+        end?: string;
+        category_id?: string;
       }
     ) => {
       try {
@@ -95,7 +100,7 @@ export const useRequests = (
   }, [loadRequests, pagination.page, pagination.pageSize, filters]);
 
   useEffect(() => {
-    loadRequests();
+    loadRequests(initialPage, initialPageSize, initialFilters);
   }, []);
 
   return {
@@ -161,27 +166,39 @@ interface UseInsightsResult {
   insights: Insights | null;
   loading: boolean;
   error: string | null;
-  loadInsights: (duration?: string) => Promise<void>;
+  loadInsights: (filters?: {
+    start?: string;
+    end?: string;
+    duration?: string;
+  }) => Promise<void>;
   refreshInsights: () => Promise<void>;
 }
 
-export const useInsights = (initialDuration?: string): UseInsightsResult => {
+export const useInsights = (initialFilters?: {
+  start?: string;
+  end?: string;
+  duration?: string;
+}): UseInsightsResult => {
   const [insights, setInsights] = useState<Insights | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [duration, setDuration] = useState<string | undefined>(initialDuration);
+  const [filters, setFilters] = useState(initialFilters || {});
 
-  const loadInsights = useCallback(async (newDuration?: string) => {
+  const loadInsights = useCallback(async (newFilters?: {
+    start?: string;
+    end?: string;
+    duration?: string;
+  }) => {
     try {
       setLoading(true);
       setError(null);
 
-      const currentDuration = newDuration ?? duration;
-      if (newDuration !== undefined) {
-        setDuration(newDuration);
+      const currentFilters = newFilters ?? filters;
+      if (newFilters) {
+        setFilters(newFilters);
       }
 
-      const result = await requestService.getInsights(currentDuration);
+      const result = await requestService.getInsights(currentFilters);
       setInsights(result);
     } catch (err: any) {
       setError(err?.message || 'Failed to load insights');
@@ -189,14 +206,14 @@ export const useInsights = (initialDuration?: string): UseInsightsResult => {
     } finally {
       setLoading(false);
     }
-  }, [duration]);
+  }, [filters]);
 
   const refreshInsights = useCallback(async () => {
-    await loadInsights(duration);
-  }, [loadInsights, duration]);
+    await loadInsights(filters);
+  }, [loadInsights, filters]);
 
   useEffect(() => {
-    loadInsights();
+    loadInsights(initialFilters);
   }, []);
 
   return {

@@ -4,21 +4,87 @@ import { SelectChangeEvent } from '@mui/material/Select';
 import { useNavigate } from 'react-router-dom';
 import RequestCard from '../components/RequestCard';
 import InsightsCard from '../components/InsightsCard';
-import { useRequests, useInsights } from '../hooks';
+import { useRequests, useInsights, useCategories } from '../hooks';
 import { DURATION_OPTIONS } from '../utils/constants';
+import dayjs from 'dayjs';
 
 const Dashboard: React.FC = () => {
   const [duration, setDuration] = useState('this week');
-  const [status, setStatus] = useState('All');
+  const [status, setStatus] = useState('all');
+  const [categoryId, setCategoryId] = useState('all');
   const navigate = useNavigate();
 
-  const { requests, loadRequests } = useRequests(1, 20, { status });
-  const { insights, loadInsights } = useInsights(duration);
+  // Fetch categories
+  const { categories } = useCategories(1, 100);
+
+  // Calculate start and end dates based on duration
+  const getDateRange = (dur: string) => {
+    const today = dayjs();
+    let start: string | null = null;
+    let end: string | null = today.format('YYYY-MM-DD');
+
+    switch (dur) {
+      case 'today':
+        start = today.format('YYYY-MM-DD');
+        break;
+      case 'this week':
+        start = today.day() === 0 ? today.startOf('day').format('YYYY-MM-DD') : today.subtract(today.day(), 'day').format('YYYY-MM-DD');
+        break;
+      case 'last week':
+        const lastWeekStart = today.subtract(today.day() + 7, 'day');
+        const lastWeekEnd = lastWeekStart.add(6, 'day');
+        start = lastWeekStart.format('YYYY-MM-DD');
+        end = lastWeekEnd.format('YYYY-MM-DD');
+        break;
+      case 'this month':
+        start = today.startOf('month').format('YYYY-MM-DD');
+        break;
+      case 'last month':
+        const lastMonth = today.subtract(1, 'month');
+        start = lastMonth.startOf('month').format('YYYY-MM-DD');
+        end = lastMonth.endOf('month').format('YYYY-MM-DD');
+        break;
+      default:
+        start = null;
+        end = null;
+    }
+
+    return { start, end };
+  };
+
+  const dateRange = getDateRange(duration);
+
+  const { requests, loadRequests, loading, error } = useRequests(1, 20, { 
+    status, 
+    start: dateRange.start || undefined, 
+    end: dateRange.end || undefined,
+    category_id: categoryId !== 'all' ? categoryId : undefined
+  });
+  const { insights, loadInsights } = useInsights({
+    start: dateRange.start || undefined,
+    end: dateRange.end || undefined
+  });
 
   useEffect(() => {
-    loadRequests(1, 20, { status });
-    loadInsights(duration);
-  }, [duration, status]);
+    const range = getDateRange(duration);
+    console.log('🔍 Dashboard filters:', { 
+      status, 
+      duration,
+      start: range.start, 
+      end: range.end,
+      category_id: categoryId !== 'all' ? categoryId : undefined
+    });
+    loadRequests(1, 20, { 
+      status, 
+      start: range.start || undefined, 
+      end: range.end || undefined,
+      category_id: categoryId !== 'all' ? categoryId : undefined
+    });
+    loadInsights({
+      start: range.start || undefined,
+      end: range.end || undefined
+    });
+  }, [status, duration, categoryId]);
 
   return (
     <Box>
@@ -119,6 +185,20 @@ const Dashboard: React.FC = () => {
               <MenuItem value="pending">Pending</MenuItem>
             </Select>
           </FormControl>
+
+          <Typography variant="body1" sx={{ fontWeight: 500, color: 'text.secondary', ml: 2 }}>
+            Filter by Category:
+          </Typography>
+          <FormControl size="small" sx={{ minWidth: 160 }}>
+            <Select value={categoryId} onChange={(e: SelectChangeEvent) => setCategoryId(e.target.value)}>
+              <MenuItem value="all">All Categories</MenuItem>
+              {categories.map((cat) => (
+                <MenuItem key={cat.ID} value={cat.CategoryName}>
+                  {cat.CategoryName}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </Box>
       </Box>
 
@@ -128,7 +208,42 @@ const Dashboard: React.FC = () => {
           Recent Requests
         </Typography>
         <Box sx={{ maxHeight: 600, overflowY: 'auto', pr: 1 }}>
-          {requests.length === 0 ? (
+          {loading ? (
+            <Card
+              sx={{
+                borderRadius: 3,
+                boxShadow: '0 4px 20px rgba(36, 17, 79, 0.08)',
+                border: '1px solid rgba(36, 17, 79, 0.1)',
+                textAlign: 'center',
+                py: 8,
+              }}
+            >
+              <CardContent>
+                <Typography variant="h6" sx={{ color: 'text.secondary', mb: 2 }}>
+                  Loading requests...
+                </Typography>
+              </CardContent>
+            </Card>
+          ) : error ? (
+            <Card
+              sx={{
+                borderRadius: 3,
+                boxShadow: '0 4px 20px rgba(36, 17, 79, 0.08)',
+                border: '1px solid rgba(36, 17, 79, 0.1)',
+                textAlign: 'center',
+                py: 8,
+              }}
+            >
+              <CardContent>
+                <Typography variant="h6" sx={{ color: 'error.main', mb: 2 }}>
+                  Error loading requests
+                </Typography>
+                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                  {error}
+                </Typography>
+              </CardContent>
+            </Card>
+          ) : requests.length === 0 ? (
             <Card
               sx={{
                 borderRadius: 3,
