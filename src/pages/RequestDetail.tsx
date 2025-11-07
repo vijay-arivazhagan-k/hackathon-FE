@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { fetchRequest, updateRequestStatus } from '../api';
 import { RequestItem } from '../types';
 import { Box, Typography, Chip, Card, CardContent, TextField, FormControl, Select, MenuItem, Button, Grid, Divider } from '@mui/material';
+import { formatCurrency } from '../utils/formatters';
 
 const RequestDetail: React.FC = () => {
   const { id } = useParams();
@@ -100,7 +101,7 @@ const RequestDetail: React.FC = () => {
                       Amount
                     </Typography>
                     <Typography variant="body1" sx={{ fontWeight: 500, color: '#24114f', fontSize: '1.1rem' }}>
-                      ${data.total_amount}
+                      {formatCurrency(data.total_amount)}
                     </Typography>
                   </Grid>
                   <Grid item xs={12} sm={6}>

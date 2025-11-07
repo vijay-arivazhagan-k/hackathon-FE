@@ -38,9 +38,30 @@ const InsightsCard: React.FC<InsightsCardProps> = ({ title, metrics }) => {
                     borderRadius: 2,
                     backgroundColor: metric.bgColor,
                     border: `1px solid ${metric.borderColor}`,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    minHeight: 100,
                   }}
                 >
-                  <Typography variant="h4" sx={{ fontWeight: 700, color: metric.color, mb: 1 }}>
+                  <Typography
+                    variant="h4"
+                    sx={{
+                      fontWeight: 700,
+                      color: metric.color,
+                      mb: 1,
+                      fontSize: { xs: '1.5rem', sm: '2rem', md: '2.25rem' },
+                      lineHeight: 1.2,
+                      maxWidth: '100%',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      width: '100%',
+                      px: 1,
+                    }}
+                    title={String(metric.value)}
+                  >
                     {metric.value}
                   </Typography>
                   <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>

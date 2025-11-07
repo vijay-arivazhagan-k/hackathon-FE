@@ -6,15 +6,21 @@
 /**
  * Format currency amount
  */
-export const formatCurrency = (amount: number | undefined, currency: string = 'USD'): string => {
-  if (amount === undefined || amount === null) {
-    return '$0.00';
+export const formatCurrency = (amount: number | undefined): string => {
+  if (amount === undefined || amount === null || isNaN(amount)) {
+    return '₹0.00';
   }
-
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: currency,
-  }).format(amount);
+  // Use Indian numbering/locale; if environment lacks 'en-IN', fallback to standard grouping
+  try {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  } catch {
+    return `₹${amount.toFixed(2)}`;
+  }
 };
 
 /**

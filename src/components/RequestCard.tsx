@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, CardContent, Typography, Box, Chip } from '@mui/material';
 import { RequestItem } from '../types';
+import { formatCurrency } from '../utils/formatters';
 
 const statusColors: Record<string, { bg: string; color: string }> = {
   approved: { bg: '#e8f5e8', color: '#4caf50' },
@@ -60,7 +61,7 @@ const RequestCard: React.FC<RequestCardProps> = ({ item, onClick }) => {
           <strong>Category:</strong> {item.category_name}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-          <strong>Amount:</strong> <span style={{ color: '#24114f', fontWeight: 500 }}>${item.total_amount}</span>
+          <strong>Amount:</strong> <span style={{ color: '#24114f', fontWeight: 500 }}>{formatCurrency(item.total_amount)}</span>
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
           <strong>Approval Type:</strong> {item.approvaltype}

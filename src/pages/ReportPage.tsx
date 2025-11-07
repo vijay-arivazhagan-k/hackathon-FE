@@ -8,6 +8,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
 import InsightsCard from '../components/InsightsCard';
+import { formatCurrency } from '../utils/formatters';
 
 const ReportPage: React.FC = () => {
   // Calculate week start (Sunday) and today
@@ -132,43 +133,43 @@ const ReportPage: React.FC = () => {
 
       <InsightsCard
         title="Summary Statistics"
-        metrics={[
-          {
-            value: data.length,
-            label: 'Total',
-            color: '#24114f',
-            bgColor: '#f8f9fa',
-            borderColor: '#e9ecef',
-          },
-          {
-            value: data.filter((d: RequestItem) => d.current_status === 'Approved').length,
-            label: 'Approved',
-            color: '#4caf50',
-            bgColor: '#e8f5e8',
-            borderColor: '#c8e6c9',
-          },
-          {
-            value: data.filter((d: RequestItem) => d.current_status === 'Rejected').length,
-            label: 'Rejected',
-            color: '#f44336',
-            bgColor: '#ffebee',
-            borderColor: '#ffcdd2',
-          },
-          {
-            value: data.filter((d: RequestItem) => d.current_status === 'Pending').length,
-            label: 'Pending',
-            color: '#ff9800',
-            bgColor: '#fff3e0',
-            borderColor: '#ffcc02',
-          },
-          {
-            value: `₹${approvedTotal.toFixed(2)}`,
-            label: 'Approved Total',
-            color: '#9c27b0',
-            bgColor: '#f3e5f5',
-            borderColor: '#ce93d8',
-          },
-        ]}
+          metrics={[
+            {
+              value: data.length,
+              label: 'Total',
+              color: '#24114f',
+              bgColor: '#f8f9fa',
+              borderColor: '#e9ecef',
+            },
+            {
+              value: data.filter((d: RequestItem) => d.current_status === 'Approved').length,
+              label: 'Approved',
+              color: '#4caf50',
+              bgColor: '#e8f5e8',
+              borderColor: '#c8e6c9',
+            },
+            {
+              value: data.filter((d: RequestItem) => d.current_status === 'Rejected').length,
+              label: 'Rejected',
+              color: '#f44336',
+              bgColor: '#ffebee',
+              borderColor: '#ffcdd2',
+            },
+            {
+              value: data.filter((d: RequestItem) => d.current_status === 'Pending').length,
+              label: 'Pending',
+              color: '#ff9800',
+              bgColor: '#fff3e0',
+              borderColor: '#ffcc02',
+            },
+            {
+              value: formatCurrency(approvedTotal),
+              label: 'Approved Total',
+              color: '#9c27b0',
+              bgColor: '#f3e5f5',
+              borderColor: '#ce93d8',
+            },
+          ]}
       />
 
       {/* Export Button */}
