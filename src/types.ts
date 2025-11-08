@@ -30,6 +30,7 @@ export interface RequestItem {
   id: number;
   user_id: string;
   total_amount?: number;
+  approved_amount?: number;
   invoice_date?: string;
   invoice_number?: string;
   category_name?: string;

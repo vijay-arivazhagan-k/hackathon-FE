@@ -31,12 +31,23 @@ export async function fetchRequest(id: number): Promise<RequestItem> {
   return data;
 }
 
-export async function updateRequestStatus(id: number, status: string, comments: string): Promise<RequestItem> {
-  const { data } = await client.patch(`/requests/${id}/status`, { 
+export async function updateRequestStatus(
+  id: number, 
+  status: string, 
+  comments: string, 
+  approvedAmount?: number
+): Promise<RequestItem> {
+  const payload: any = { 
     status: status.charAt(0).toUpperCase() + status.slice(1).toLowerCase(), 
     comments, 
     updated_by: 'ADMIN' 
-  });
+  };
+  
+  if (approvedAmount !== undefined) {
+    payload.approved_amount = approvedAmount;
+  }
+  
+  const { data } = await client.patch(`/requests/${id}/status`, payload);
   return data;
 }
 

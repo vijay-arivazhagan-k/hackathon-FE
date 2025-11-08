@@ -64,6 +64,9 @@ const RequestCard: React.FC<RequestCardProps> = ({ item, onClick }) => {
           <strong>Amount:</strong> <span style={{ color: '#24114f', fontWeight: 500 }}>{formatCurrency(item.total_amount)}</span>
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+          <strong>Approved Amount:</strong> <span style={{ color: '#4caf50', fontWeight: 600 }}>{formatCurrency(item.approved_amount)}</span>
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
           <strong>Approval Type:</strong> {item.approvaltype}
         </Typography>
       </CardContent>

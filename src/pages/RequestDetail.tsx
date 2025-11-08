@@ -10,8 +10,15 @@ const RequestDetail: React.FC = () => {
   const [data, setData] = useState<RequestItem | null>(null);
   const [newStatus, setNewStatus] = useState<string>('Pending');
   const [comments, setComments] = useState('');
+  const [editableApprovedAmount, setEditableApprovedAmount] = useState<number>(0);
 
   useEffect(() => { load(); }, [id]);
+
+  useEffect(() => {
+    if (data && newStatus === 'Approved') {
+      setEditableApprovedAmount(data.approved_amount || 0);
+    }
+  }, [newStatus, data]);
 
   async function load() {
     if (!id) return;
@@ -22,7 +29,8 @@ const RequestDetail: React.FC = () => {
 
   async function save() {
     if (!id || !comments) return;
-    const updated = await updateRequestStatus(Number(id), newStatus, comments);
+    const approvedAmount = newStatus === 'Approved' ? editableApprovedAmount : undefined;
+    const updated = await updateRequestStatus(Number(id), newStatus, comments, approvedAmount);
     setData(updated);
     setComments('');
   }
@@ -106,6 +114,14 @@ const RequestDetail: React.FC = () => {
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                      Approved Amount
+                    </Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 600, color: '#4caf50', fontSize: '1.1rem' }}>
+                      {formatCurrency(data.approved_amount)}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
                       Current Status
                     </Typography>
                     <Chip
@@ -171,6 +187,23 @@ const RequestDetail: React.FC = () => {
                   </Select>
                 </FormControl>
               </Box>
+              {newStatus === 'Approved' && (
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                    Approved Amount (₹)
+                  </Typography>
+                  <TextField
+                    type="number"
+                    fullWidth
+                    size="small"
+                    value={editableApprovedAmount}
+                    onChange={(e) => setEditableApprovedAmount(Number(e.target.value))}
+                    placeholder="Enter approved amount..."
+                    inputProps={{ min: 0, step: 0.01 }}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                  />
+                </Box>
+              )}
               <Box sx={{ mb: 3 }}>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                   Comments
